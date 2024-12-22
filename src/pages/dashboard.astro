@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import { supabase } from "../lib/supabase";
 import Cookies from "js-cookie";
+import VendorsGrid from '../components/VendorsGrid';
 
 // const accessToken = Cookies.get("sb-access-token");
 // const refreshToken = Cookies.get("sb-refresh-token");
@@ -39,14 +40,51 @@ try {
 }
 
 const email = session.data.user?.email;
----
-<Layout title="dashboard">
-  <h1>Welcome {email}</h1>
-  <p>We are happy to see you here</p>
-  <form action="/api/auth/signout">
-    <button type="submit">Sign out</button>
-  </form>
-</Layout>
-<script>
 
-</script>
+// Get all vendors and log the query for debugging
+async function getFilteredVendors() {
+  const searchParams = Astro.url.searchParams;
+  const searchQuery = searchParams.get('search');
+  const ratingFilter = searchParams.get('rating');
+  const serviceFilter = searchParams.get('service');
+
+  let query = supabase.from('vendors').select();
+
+  if (searchQuery) {
+    query = query.ilike('name', `%${searchQuery}%`);
+  }
+
+  if (ratingFilter) {
+    query = query.gte('rating', parseInt(ratingFilter));
+  }
+
+  if (serviceFilter) {
+    query = query.eq('service', serviceFilter);
+  }
+
+  const { data: vendors, error } = await query;
+  return { vendors, error };
+}
+
+const { vendors, error } = await getFilteredVendors();
+
+console.log('vendors: ', vendors, error);
+---
+<Layout title="Wedding Vendors">
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold">Welcome {email}</h1>
+      <form action="/api/auth/signout" class="ml-4">
+        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Sign out</button>
+      </form>
+    </div>
+
+    <VendorsGrid 
+      client:load 
+      initialVendors={vendors || []}
+      initialSearchQuery={Astro.url.searchParams.get('search') || ''}
+      initialRatingFilter={Astro.url.searchParams.get('rating') || ''}
+      initialServiceFilter={Astro.url.searchParams.get('service') || ''}
+    />
+  </div>
+</Layout>

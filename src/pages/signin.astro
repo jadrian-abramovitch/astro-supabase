@@ -1,5 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import LoginForm from '../components/LoginForm';
+import flowers from '../assets/flowers.jpeg';
 
 const { cookies, redirect } = Astro;
 
@@ -10,15 +12,30 @@ if (accessToken && refreshToken) {
   return redirect("/dashboard");
 }
 ---
-
-<Layout title="Sign in">
-  <h1>Sign in</h1>
-  <p>New here? <a href="/register">Create an account</a></p>
-  <form action="/api/auth/signin" method="post">
-    <label for="email">Email</label>
-    <input type="email" name="email" id="email" />
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" />
-    <button type="submit">Login</button>
-  </form>
+<Layout title="Login">
+  <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md overflow-hidden sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white rounded-lg shadow-md">
+      <div class="flex flex-col md:flex-row">
+        <div class="md:w-1/2 bg-primary p-6 text-primary-foreground flex flex-col">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">Welcome Back</h2>
+            <p class="text-sm mb-4">Log in to access your account and manage your projects.</p>
+          </div>
+          <div class="hidden md:flex flex-1 items-center justify-center">
+            <img
+              src={flowers.src}
+              alt="Login illustration"
+              width={400}
+              height={300}
+              class="rounded-lg"
+            />
+          </div>
+        </div>
+        <div class="md:w-1/2 p-6">
+          <LoginForm client:load />
+        </div>
+      </div>
+    </div>
+  </div>
 </Layout>
+
